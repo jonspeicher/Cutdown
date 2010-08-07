@@ -8,10 +8,11 @@
 #include <NewSoftSerial.h>
 #include <TinyGPS.h>
 
-// Set the serial pins here.
+// Set the serial pins and baud rate here.
 
 #define RX_PIN 3
 #define TX_PIN 2
+#define GPS_BAUD_RATE 4800
 
 // Set the cutdown pin and cutdown on time here.
 
@@ -45,6 +46,7 @@ void setup()
 {
   pinMode(CUTDOWN_PIN, OUTPUT);
   pinMode(CUTDOWN_PIN, OUTPUT);
+  serial.begin(GPS_BAUD_RATE);
 }
 
 void loop()
