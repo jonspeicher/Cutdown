@@ -44,6 +44,13 @@ History
 
 * Initial release (totally untested)
 
+0.2
+---
+
+* Fix a bug where cutdown target altitude was specified in feet but TinyGPS returns altitude in
+  meters
+* Still totally untested :)
+
 Author
 ======
 

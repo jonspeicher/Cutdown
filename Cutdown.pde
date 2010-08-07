@@ -24,14 +24,14 @@
 
 #define CUTDOWN_PIN                    4
 #define CUTDOWN_WIRE_ACTIVE_TIME_MS    3000
-#define CUTDOWN_TARGET_ALTITUDE        98000.0
+#define CUTDOWN_TARGET_ALTITUDE_METERS 29870.4
 #define CUTDOWN_TARGET_COUNT_THRESHOLD 3
 
 // Set the beep pin, beep interval here, and beep on time here.  The beep pin should be connected to
 // a piezo or other such noisemaker.  It will be turned on at the specified interval, and will
 // remain on for the specified on time.
 
-#define BEEP_PIN 5
+#define BEEP_PIN         5
 #define BEEP_INTERVAL_MS 20000
 #define BEEP_ON_TIME_MS  3000
 
@@ -67,19 +67,19 @@ void loop()
     
     if (gpsDecoder.encode(ch))
     {
-      float latitude, longitude, altitude;
+      float latitude, longitude, altitudeMeters;
       unsigned long fixAge;
       
       // Grab the position and the altitude.  We don't much care about the position but we get a
       // convenient indication of the GPS decoder's last good "fix" along with it.
       
       gpsDecoder.f_get_position(&latitude, &longitude, &fixAge);
-      altitude = gpsDecoder.f_altitude();
+      altitudeMeters = gpsDecoder.f_altitude();
       
       // If we're above the target altitude and we've seen at least one good "fix" from the GPS, 
       // bump the cutdown altitude target counter.  Otherwise start over.
       
-      if ((altitude >= CUTDOWN_TARGET_ALTITUDE) && (fixAge != TinyGPS::GPS_INVALID_AGE))
+      if ((altitudeMeters >= CUTDOWN_TARGET_ALTITUDE_METERS) && (fixAge != TinyGPS::GPS_INVALID_AGE))
       {
         cutdownTargetAltitudeCount++;
       }
