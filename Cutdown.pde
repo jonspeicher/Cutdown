@@ -38,14 +38,17 @@
 
 TinyGPS gps;
 NewSoftSerial serial(RX_PIN, TX_PIN);
+
 unsigned int cutdownTargetAltitudeCount = 0;
 boolean cutdownComplete = false;
-unsigned long lastBeepMillis = 0;
+
+unsigned long beepStartMillis = 0;
+boolean beeping = false;
 
 void setup()
 {
   pinMode(CUTDOWN_PIN, OUTPUT);
-  pinMode(CUTDOWN_PIN, OUTPUT);
+  pinMode(BEEP_PIN, OUTPUT);
   serial.begin(GPS_BAUD_RATE);
 }
 
@@ -80,11 +83,18 @@ void loop()
     }
   }
   
-  if ((millis() - lastBeepMillis) > BEEP_INTERVAL_MS)
+  if ((beeping) && ((millis() - beepStartMillis) > BEEP_ON_TIME_MS))
   {
-    beep();
-    lastBeepMillis = millis();
+    digitalWrite(BEEP_PIN, LOW);
+    beeping = false;
   }
+  else if ((!beeping) && ((millis() - beepStartMillis) > BEEP_INTERVAL_MS))
+  {
+    digitalWrite(BEEP_PIN, HIGH);
+    beepStartMillis = millis();
+    beeping = true;
+  }
+  
 }
 
 void cutdown()
@@ -92,11 +102,4 @@ void cutdown()
   digitalWrite(CUTDOWN_PIN, HIGH);
   delay(CUTDOWN_ON_TIME_MS);
   digitalWrite(CUTDOWN_PIN, LOW);
-}
-
-void beep()
-{
-  digitalWrite(BEEP_PIN, HIGH);
-  delay(BEEP_ON_TIME_MS);
-  digitalWrite(BEEP_PIN, LOW);
 }
