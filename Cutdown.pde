@@ -15,9 +15,9 @@
 #define GPS_RX_PIN        3   // The GPS receiver's TTL level output is connected to this pin.
 #define GPS_TX_PIN        2   // NewSoftSerial requires a TX pin; set this to something unused!
 #define GPS_LOCK_LED_PIN  8   // The GPS lock indicator LED is connected to this active high pin.
+#define CUTDOWN_PIN       12  // The nichrome wire relay is connected to this active high pin.
 #define BEACON_LED_PIN    10  // The beacon LED is connected to this active high pin.
 #define BEACON_PIEZO_PIN  11  // The beacon piezo buzzer is connected to this active high pin.
-#define CUTDOWN_PIN       12  // The nichrome wire relay is connected to this active high pin.
 
 // Define some parameters specific to the GPS module and to GPS tracking.
 
@@ -42,15 +42,13 @@
 
 TinyGPS gpsDecoder;
 NewSoftSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
+unsigned long gpsLastGoodLockMillis = 0;
 
 unsigned int cutdownTargetAltitudeCount = 0;
 boolean cutdownComplete = false;
 
-unsigned long lastGoodGPSLockMillis = 0;
-unsigned long beepStartMillis = 0;
-boolean beeping = false;
-
-boolean gpsLockPinHigh = false;
+boolean beaconActive = false;
+unsigned long beaconStartMillis = 0;
 
 // Setup and loop ----------------------------------------------------------------------------------
 
@@ -58,10 +56,13 @@ void setup()
 {
   // Configure the pins and start up the serial communication with the GPS.
 
-  pinMode(GPS_LOCK_LED_PIN, OUTPUT);
-  pinMode(CUTDOWN_PIN, OUTPUT);
-  pinMode(BEACON_PIEZO_PIN, OUTPUT);
   gpsSerial.begin(GPS_BAUD_RATE);
+  pinMode(GPS_LOCK_LED_PIN, OUTPUT);
+  
+  pinMode(CUTDOWN_PIN, OUTPUT);
+  
+  pinMode(BEACON_PIEZO_PIN, OUTPUT);
+  pinMode(BEACON_LED_PIN, OUTPUT);
 }
 
 void loop()
@@ -86,12 +87,7 @@ void loop()
       // Did we get a good and locked reading from the GPS that's not too stale.
       if ((fixAge != TinyGPS::GPS_INVALID_AGE) && (fixAge < GPS_FIX_AGE_LIMIT_MS))
       {
-        lastGoodGPSLockMillis = millis();
-        if (!gpsLockPinHigh)
-        {
-          digitalWrite(GPS_LOCK_LED_PIN, HIGH);
-          gpsLockPinHigh = true;
-        }
+        gpsLastGoodLockMillis = millis();
         
         if (altitudeMeters > CUTDOWN_TARGET_ALTITUDE_METERS)
         {
@@ -121,28 +117,28 @@ void loop()
   // If we're not beeping and it's time to start, start.  Remember the time we started beeping for
   // later use.  If we're beeping and it's time to stop, stop.  
 
-  if ((!beeping) && ((millis() - beepStartMillis) > BEACON_INTERVAL_MS))
+  if ((!beaconActive) && ((millis() - beaconStartMillis) > BEACON_INTERVAL_MS))
   {
-    digitalWrite(BEACON_PIEZO_PIN, HIGH);
     digitalWrite(BEACON_LED_PIN, HIGH);
-    beepStartMillis = millis();
-    beeping = true;
+    digitalWrite(BEACON_PIEZO_PIN, HIGH);
+    beaconStartMillis = millis();
+    beaconActive = true;
   }
-  else if ((beeping) && ((millis() - beepStartMillis) > BEACON_ON_TIME_MS))
+  else if ((beaconActive) && ((millis() - beaconStartMillis) > BEACON_ON_TIME_MS))
   {
     digitalWrite(BEACON_LED_PIN, LOW);
     digitalWrite(BEACON_PIEZO_PIN, LOW);
-    beeping = false;
+    beaconActive = false;
   }
   
-  if (gpsLockPinHigh && ((millis() - lastGoodGPSLockMillis) > GPS_FIX_AGE_LIMIT_MS))
+  if ((millis() - gpsLastGoodLockMillis) > GPS_FIX_AGE_LIMIT_MS)
   {
     digitalWrite(GPS_LOCK_LED_PIN, LOW);
-    gpsLockPinHigh = false;
   }
-  
-
-
+  else
+  {
+    digitalWrite(GPS_LOCK_LED_PIN, HIGH);
+  }
 }
 
 // Helper functions --------------------------------------------------------------------------------
