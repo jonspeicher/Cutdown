@@ -23,7 +23,6 @@
 
 #define GPS_BAUD_RATE         4800  // The baud rate at which the GPS module sends data.
 #define GPS_FIX_AGE_LIMIT_MS  5000  // The time limit beyond which we will discard GPS fix data.
-#define GPS_LOCK_LED_LIMIT_MS 2000  // THe time limit beyond which we will turn off the lock LED.
 
 // Define some parameters specific to the cutdown functionality.  Experiments at room temperature on
 // the ground indicate less than 1 second of cutdown activation time is needed.  Given the ambient
@@ -136,7 +135,7 @@ void loop()
     beeping = false;
   }
   
-  if (gpsLockPinHigh && ((millis() - lastGoodGPSLockMillis) > GPS_LOCK_LED_LIMIT_MS))
+  if (gpsLockPinHigh && ((millis() - lastGoodGPSLockMillis) > GPS_FIX_AGE_LIMIT_MS))
   {
     digitalWrite(GPS_LOCK_LED_PIN, LOW);
     gpsLockPinHigh = false;
