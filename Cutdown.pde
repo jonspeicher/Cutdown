@@ -73,6 +73,8 @@ void loop()
   {
     int ch = gpsSerial.read();
 
+    // If we've just finished decoding a new message, act on it.
+    
     if (gpsDecoder.encode(ch))
     {
       float latitude, longitude, altitudeMeters;
@@ -84,23 +86,13 @@ void loop()
       gpsDecoder.f_get_position(&latitude, &longitude, &fixAge);
       altitudeMeters = gpsDecoder.f_altitude();
 
-      // Did we get a good and locked reading from the GPS that's not too stale.
-      if ((fixAge != TinyGPS::GPS_INVALID_AGE) && (fixAge < GPS_FIX_AGE_LIMIT_MS))
+      // Did we get a good and locked reading from the GPS that's not too stale?  Update the cutdown
+      // tracker.
+      
+      if (goodLock(fixAge))
       {
         gpsLastGoodLockMillis = millis();
-        
-        if (altitudeMeters > CUTDOWN_TARGET_ALTITUDE_METERS)
-        {
-          cutdownTargetAltitudeCount++;
-        }
-        else
-        {
-          cutdownTargetAltitudeCount = 0;
-        }
-      }
-      else
-      {
-        cutdownTargetAltitudeCount = 0;
+        updateCutdownTracker(altitudeMeters);
       }
     }
   }
@@ -120,6 +112,11 @@ void loop()
 
 // GPS helper functions ----------------------------------------------------------------------------
 
+boolean goodLock(unsigned long age)
+{
+  return ((age != TinyGPS::GPS_INVALID_AGE) && (age < GPS_FIX_AGE_LIMIT_MS));
+}
+
 void handleGpsLockIndicator()
 {
   // If we haven't seen a good GPS lock within the proper time, turn the indicator off.  Otherwise,
@@ -136,6 +133,20 @@ void handleGpsLockIndicator()
 }
 
 // Cutdown helper functions ------------------------------------------------------------------------
+
+void updateCutdownTracker(float altitudeMeters)
+{
+  // If we are above the target altitude in meters, increment the count.  If we aren't, reset it.
+  
+  if (altitudeMeters > CUTDOWN_TARGET_ALTITUDE_METERS)
+  {
+    cutdownTargetAltitudeCount++;
+  }
+  else
+  {
+    cutdownTargetAltitudeCount = 0;
+  }
+}
 
 void handleCutdown()
 {
