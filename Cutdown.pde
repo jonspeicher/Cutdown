@@ -102,23 +102,30 @@ void loop()
       {
         cutdownTargetAltitudeCount = 0;
       }
-      
-      // If we've counted enough target altitude events and haven't already cut down, cut down.
-      // Remember that the cutdown has occurred.
-
-      if ((!cutdownComplete) && (cutdownTargetAltitudeCount >= CUTDOWN_TARGET_COUNT_THRESHOLD))
-      {
-        cutdown();
-        cutdownComplete = true;
-      }
     }
   }
 
+  // Ensure that the GPS lock indicator is in the proper state.
+  
+  handleGpsLockIndicator();
+  
+  // Handle a cutdown event if it's time.
+  
+  handleCutdown();
+  
   // Mmm, beacon.
 
   handleBeacon();
+}
+
+// GPS helper functions ----------------------------------------------------------------------------
+
+void handleGpsLockIndicator()
+{
+  // If we haven't seen a good GPS lock within the proper time, turn the indicator off.  Otherwise,
+  // make sure it's on.
   
-  if ((millis() - gpsLastGoodLockMillis) > GPS_FIX_AGE_LIMIT_MS)
+  if ((millis() - gpsLastGoodLockMillis) >= GPS_FIX_AGE_LIMIT_MS)
   {
     digitalWrite(GPS_LOCK_LED_PIN, LOW);
   }
@@ -129,6 +136,18 @@ void loop()
 }
 
 // Cutdown helper functions ------------------------------------------------------------------------
+
+void handleCutdown()
+{
+  // If we've counted enough target altitude events and haven't already cut down, cut down.
+  // Remember that the cutdown has occurred.
+
+  if ((!cutdownComplete) && (cutdownTargetAltitudeCount >= CUTDOWN_TARGET_COUNT_THRESHOLD))
+  {
+    cutdown();
+    cutdownComplete = true;
+  }
+}
 
 void cutdown()
 {

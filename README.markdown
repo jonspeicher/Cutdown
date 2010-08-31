@@ -1,4 +1,4 @@
-cutdown
+Cutdown
 =======
 
 cutdown is an Arduino-based launch stack cutdown system for HackPittsburgh's high-altitude balloon.
@@ -51,10 +51,12 @@ History
   meters
 * Still totally untested :)
 
-Author
-======
+Contributors
+============
 
 Jon Speicher ([jon.speicher@hackpittsburgh.org](mailto:jon.speicher@hackpittsburgh.org))
+Doug Philips
+Isaac Gierard
 
 Credits
 =======
