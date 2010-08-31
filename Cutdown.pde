@@ -114,22 +114,9 @@ void loop()
     }
   }
 
-  // If we're not beeping and it's time to start, start.  Remember the time we started beeping for
-  // later use.  If we're beeping and it's time to stop, stop.  
+  // Mmm, beacon.
 
-  if ((!beaconActive) && ((millis() - beaconStartMillis) > BEACON_INTERVAL_MS))
-  {
-    digitalWrite(BEACON_LED_PIN, HIGH);
-    digitalWrite(BEACON_PIEZO_PIN, HIGH);
-    beaconStartMillis = millis();
-    beaconActive = true;
-  }
-  else if ((beaconActive) && ((millis() - beaconStartMillis) > BEACON_ON_TIME_MS))
-  {
-    digitalWrite(BEACON_LED_PIN, LOW);
-    digitalWrite(BEACON_PIEZO_PIN, LOW);
-    beaconActive = false;
-  }
+  handleBeacon();
   
   if ((millis() - gpsLastGoodLockMillis) > GPS_FIX_AGE_LIMIT_MS)
   {
@@ -141,11 +128,43 @@ void loop()
   }
 }
 
-// Helper functions --------------------------------------------------------------------------------
+// Cutdown helper functions ------------------------------------------------------------------------
 
 void cutdown()
 {
   digitalWrite(CUTDOWN_PIN, HIGH);
   delay(CUTDOWN_WIRE_ACTIVE_TIME_MS);
   digitalWrite(CUTDOWN_PIN, LOW);
+}
+
+// Beacon helper functions -------------------------------------------------------------------------
+
+void handleBeacon()
+{
+  // If the beacon is off and it's time to turn it on, turn it on.  Remember the time we started the
+  // beacon for later use.  If the beacon is on and it's time to turn it off, turn it off.
+  
+  if ((!beaconActive) && ((millis() - beaconStartMillis) >= BEACON_INTERVAL_MS))
+  {
+    beaconOn();
+    beaconStartMillis = millis();
+  }
+  else if ((beaconActive) && ((millis() - beaconStartMillis) >= BEACON_ON_TIME_MS))
+  {
+    beaconOff();
+  }
+}
+
+void beaconOn()
+{
+  digitalWrite(BEACON_PIEZO_PIN, HIGH);
+  digitalWrite(BEACON_LED_PIN, HIGH);
+  beaconActive = true;
+}
+
+void beaconOff()
+{
+  digitalWrite(BEACON_PIEZO_PIN, LOW);
+  digitalWrite(BEACON_LED_PIN, LOW);
+  beaconActive = false;
 }
