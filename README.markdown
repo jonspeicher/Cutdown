@@ -91,7 +91,7 @@ History
 Contributors
 ============
 
-* Jon Speicher ([jon.speicher@hackpittsburgh.org](mailto:jon.speicher@hackpittsburgh.org))
+* Jon Speicher ([jonathan@hackpittsburgh.org](mailto:jonathan@hackpittsburgh.org))
 * Doug Philips
 * Isaac Gierard
 

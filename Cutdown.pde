@@ -2,7 +2,7 @@
 // Cutdown - High-altitude balloon launch stack cutdown via nichrome wire plus tracer beacons
 // A project of HackPittsburgh (http://www.hackpittsburgh.org)
 //
-// Copyright (c) 2010 Jonathan Speicher (jon.speicher@hackpittsburgh.org)
+// Copyright (c) 2010 Jonathan Speicher (jonathan@hackpittsburgh.org)
 // Licensed under the MIT license: http://creativecommons.org/licenses/MIT
 // -------------------------------------------------------------------------------------------------
 
